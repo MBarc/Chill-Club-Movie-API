@@ -1,1 +1,14 @@
-{}
+{
+	"movie_choice_1": "example 1",
+	"movie_choice_2": "example 2",
+	"movie_choice_3": "example 3",
+	"movie_choice_4": "example 4",
+	"movie_choice_5": "example 5",
+	"all_movies_list": [
+		"example 1",
+		"example 2",
+		"example 3",
+		"example 4",
+		"example 5"
+	]
+}
