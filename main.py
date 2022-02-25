@@ -3,8 +3,8 @@ In order to get this script working, you must set an environmental variable
 that specifies the name of this file.
 
 Commands to specify environmental variable in PowerShell:
-set FLASK_APP=hello.py
-$env:FLASK_APP = "hello.py"
+set FLASK_APP=main.py
+$env:FLASK_APP = "main.py"
 flask run
 """
 
@@ -13,7 +13,6 @@ from flask import Flask, jsonify, request, json
 app = Flask(__name__)
 
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
-app.config['JSON_SORT_KEYS'] = False
 
 '''
 Method: GET
@@ -21,7 +20,7 @@ Description: Confirms that the api is up and working.
 '''
 @app.route("/", methods = ['GET'])
 def get_api_status():
-  return_json = {"status_code": f"200", "Note": "OK. Request has succeeded.", "Message": "The API is up and running!"}
+  return_json = {"status_code": f"200", "Message": "OK. Request has succeeded.", "Message": "The API is up and running!"}
   return jsonify(return_json)
 
 '''
@@ -40,16 +39,17 @@ Description: Gets the amount of choices there could be.
 
 Method: POST
 Description: Changes the amount of choices there could be.
-Variable name: choiceCount
+Variable name: 
+  - choiceCount: The amount of choices you want there to be.
 '''
 @app.route("/numberOfChoices", methods = ['GET', 'POST'])
 def number_choices():
 
   # Specifying the location of our database file
-  database_file = "database.json"
+  database_file_path = "database.json"
 
   # Opening our database file as a file object
-  with open(database_file) as database_file:
+  with open(database_file_path, "r+") as database_file:
 
     # Converting out file object to a json object
     database_decoded = json.load(database_file)
@@ -70,7 +70,7 @@ def number_choices():
     if request.method == "POST":
 
       # Specifying that the request is a JSON just in case the developer did not include that in their header
-      request_data = request.get_json()
+      request_data = json.loads(request.data, strict=False)
 
       # Converting from string to int so we can use it to iterate
       choiceCount = int(request_data["choiceCount"])
@@ -81,17 +81,24 @@ def number_choices():
         # If choiceCount is greater than count
         if choiceCount > count:
           count += 1
-          database_decoded["movie_choice_" + count] = "null"
+          database_decoded["movie_choice_" + str(count)] = "null"
         else:
           # Deleting choices until choiceCount is equal to count
-          del database_decoded["movie_choice_" + count]
+          del database_decoded["movie_choice_" + str(count)]
           count -=1
+      
+      # Writing any changes back to the database file
+      database_file.seek(0)
+      json_object = json.dumps(database_decoded, indent=4)
+      database_file.write(json_object)
+      database_file.truncate()
 
-        return_json = {"status_code": "200", "Note": "OK. Request has succeeded."}
-        return jsonify(return_json)
+
+      return_json = {"status_code": "200", "Note": "OK. Request has succeeded."}
+      return jsonify(return_json)
   
   # This only happens if the user did not submit either a GET or POST request
-  return_json = {"status_code": "400", "Note": "Bad Request. This endpoint only handles GET and POST requests."}
+  return_json = {"status_code": "400", "Message": "Bad Request. This endpoint only handles GET and POST requests."}
   return jsonify(return_json)
 
 '''
@@ -114,12 +121,15 @@ def movie_choice():
   database_file = "database.json"
 
   # Opening our database file as a file object
-  with open(database_file) as database_file:
+  with open(database_file, "r+") as database_file:
 
     # Converting out file object to a json object
     database_decoded = json.load(database_file)
 
-    choiceNumber = request.args.get("choiceNumber")
+    # Specifying that the request is a JSON just in case the developer did not include that in their header
+    request_data = json.loads(request.data, strict=False)
+
+    choiceNumber = str(request_data["choiceNumber"])
 
     # If the request is a GET request
     if request.method == "GET":
@@ -130,20 +140,27 @@ def movie_choice():
 
     if request.method == "POST":
 
-      choiceName = request.args.get("choiceName")
+      choiceName = request_data["choiceName"]
 
       # If the choice name is a valid movie option
       if choiceName in database_decoded["all_movies_list"]:
         database_decoded["movie_choice_" + choiceNumber] = choiceName
 
         return_json = {"status_code": "200", f'{"movie_choice_" + choiceNumber}': choiceName}
+
+        # Writing any changes back to the database file
+        database_file.seek(0)
+        json_object = json.dumps(database_decoded, indent=4)
+        database_file.write(json_object)
+        database_file.truncate()  
         return jsonify(return_json)
+
       else:
-        return_json = {"status_code": "400", "Note": 'Bad Request. choiceName does not match any movie option found in all_movies_list. Go to endpoint "/allMovies" and look at all_movies_list for a full list of valid movie options.'}
+        return_json = {"status_code": "400", "Message": 'Bad Request. choiceName does not match any movie option found in all_movies_list. Go to endpoint "/allMovies" and look at all_movies_list for a full list of valid movie options.'}
         return jsonify(return_json)
 
   # This only happens if the user did not submit either a GET or POST request
-  return_json = {"status_code": "400", "Note": "Bad Request. This endpoint only handles GET and POST requests."}
+  return_json = {"status_code": "400", "Message": "Bad Request. This endpoint only handles GET and POST requests."}
   return jsonify(return_json)
 
 '''
@@ -162,10 +179,10 @@ def all_movies():
   database_file = "database.json"
 
   # Specifying that the request is a JSON just in case the developer did not include that in their header
-  request_data = request.get_json()
+  request_data = json.loads(request.data, strict=False)
 
   # Opening our database file as a file object
-  with open(database_file) as database_file:
+  with open(database_file, "r+") as database_file:
 
     # Converting out file object to a json object
     database_decoded = json.load(database_file)
@@ -181,11 +198,32 @@ def all_movies():
 
       movieName = request_data["movieName"]
 
-      database_file["all_movies_list"].append(movieName)
+      if request_data["operation"] == "add":
 
-      return_json = {"status_code": "200", "Message": "Movie has been added."}
-      return jsonify(return_json)
-  
-  # This only happens if the user did not submit either a GET or POST request
-  return_json = {"status_code": "400", "Note": "Bad Request. This endpoint only handles GET and POST requests."}
-  return jsonify(return_json)
+        database_decoded["all_movies_list"].append(movieName)
+
+        # Writing any changes back to the database file
+        database_file.seek(0)
+        json_object = json.dumps(database_decoded, indent=4)
+        database_file.write(json_object)
+        database_file.truncate()
+
+        return_json = {"status_code": "200", "Message": "Movie has been added."}
+        return jsonify(return_json)
+
+      if request_data["operation"] == "remove":
+
+        database_decoded["all_movies_list"].remove(movieName)
+
+        # Writing any changes back to the database file
+        database_file.seek(0)
+        json_object = json.dumps(database_decoded, indent=4)
+        database_file.write(json_object)
+        database_file.truncate()
+
+        return_json = {"status_code": "200", "Message": "Movie has been removed."}
+        return jsonify(return_json)
+
+    # This only happens if the user did not submit either a GET or POST request
+    return_json = {"status_code": "400", "Message": 'Bad Request. Operation variable can only be "add" or "remove"'}
+    return jsonify(return_json)
