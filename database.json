@@ -1,14 +1,1 @@
-{
-	"movie_choice_1": "choice 1",
-	"movie_choice_2": "choice 2",
-	"movie_choice_3": "choice 3",
-	"movie_choice_4": "choice 4",
-	"movie_choice_5": "choice 5",
-	"all_movies_list": [
-		"name 1",
-		"name 2",
-		"name 3",
-		"name 4",
-		"name 5"
-	]
-}
+{}
