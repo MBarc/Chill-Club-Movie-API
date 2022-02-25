@@ -113,32 +113,33 @@ def movie_choice():
   # Specifying the location of our database file
   database_file = "database.json"
 
-  # Specifying that the request is a JSON just in case the developer did not include that in their header
-  request_data = request.get_json()
-
   # Opening our database file as a file object
   with open(database_file) as database_file:
 
     # Converting out file object to a json object
     database_decoded = json.load(database_file)
 
+    choiceNumber = request.args.get("choiceNumber")
+
     # If the request is a GET request
     if request.method == "GET":
-      movie = database_decoded["movie_choice_" + request_data["choiceNumber"]]
+      movie = database_decoded["movie_choice_" + choiceNumber]
 
-      return_json = {"status_code": "200", f'{database_decoded["movie_choice_" + request_data["choiceNumber"]]}': movie}
+      return_json = {"status_code": "200", f'{"movie_choice_" + choiceNumber}': movie}
       return jsonify(return_json)
 
     if request.method == "POST":
 
-      # If the choice name is a valid movie option
-      if request_data["choiceName"] in database_decoded["all_movies_list"]:
-        database_decoded["movie_choice_" + request_data["choiceNumber"]] = request_data["choiceName"]
+      choiceName = request.args.get("choiceName")
 
-        return_json = {"status_code": "200", f'{database_decoded["movie_choice_" + request_data["choiceNumber"]]}': movie}
+      # If the choice name is a valid movie option
+      if choiceName in database_decoded["all_movies_list"]:
+        database_decoded["movie_choice_" + choiceNumber] = choiceName
+
+        return_json = {"status_code": "200", f'{"movie_choice_" + choiceNumber}': choiceName}
         return jsonify(return_json)
       else:
-        return_json = {"status_code": "400", "Note": 'Bad Request. choiceName does not match any movie option found in all_movies_list. Go to endpoint "/allData" and look at all_movies_list for a full list of valid movie options.'}
+        return_json = {"status_code": "400", "Note": 'Bad Request. choiceName does not match any movie option found in all_movies_list. Go to endpoint "/allMovies" and look at all_movies_list for a full list of valid movie options.'}
         return jsonify(return_json)
 
   # This only happens if the user did not submit either a GET or POST request
