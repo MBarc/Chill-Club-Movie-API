@@ -10,7 +10,7 @@ flask run
 import random
 import os
 from pymongo import MongoClient
-from flask import Flask, jsonify, request, json, Response
+from flask import Flask, jsonify, request, json
 from flask_cors import CORS, cross_origin
 from bson.objectid import ObjectId # used for getting/specifying certian documents
 from bson import json_util
