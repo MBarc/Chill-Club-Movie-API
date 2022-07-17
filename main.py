@@ -492,5 +492,5 @@ def winning_choices():
   return jsonify(return_json), 400
 
 if __name__ == "__main__":
-    port = int(os.environ["API_PORT"])
-    app.run(debug=True, host='0.0.0.0', port=port)
+    api_port = int(os.environ["API_PORT"])
+    app.run(debug=True, host='0.0.0.0', port=api_port)
