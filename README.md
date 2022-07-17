@@ -8,6 +8,7 @@ This API is responsible for connecting different technologies that Chill Club us
 
 Endpoint: /
 GET: Confirms that the api is up and working.
+Example: http://api-movietheater.chillclub.online:5555/
 
 Endpoint: /allData
 GET: Gets all database information.
