@@ -24,8 +24,8 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 # Variables to establish mongodb connection
 username = os.environ["MONGODB_USER"]
 password = os.environ["MONGODB_PASS"]
-hostname = os.environ["HOSTNAME"]
-port = os.environ["PORT"]
+hostname = os.environ["MONGODB_HOSTNAME"]
+port = os.environ["MONGODB_PORT"]
 
 # Establishing a connection to the mongodb
 client = MongoClient(f"mongodb://{username}:{password}@{hostname}:{port}/?authMechanism=DEFAULT")
