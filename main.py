@@ -490,3 +490,7 @@ def winning_choices():
   # This only happens if the user did not submit either a GET or POST request
   return_json = {"Message": "Bad Request. This endpoint only handles GET and POST requests."}
   return jsonify(return_json), 400
+
+if __name__ == "__main__":
+    port = int(os.environ["API_PORT"])
+    app.run(debug=True, host='0.0.0.0', port=port)
