@@ -117,8 +117,6 @@ Description: Confirms that the api is up and working.
 @app.route("/", methods = ['GET'])
 def get_api_status():
   return_json = {"Message": "The API is up and running!"}
-  #return_json = {"status_code": f"200", "Message": "OK. Request has succeeded.", "Message": "The API is up and running!"}
-  #return jsonify(return_json)
   return jsonify(return_json), 200
 
 
